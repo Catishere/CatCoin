@@ -1,4 +1,6 @@
-package utils;
+package blockchain;
+
+import utils.ByteUtils;
 
 import java.util.Arrays;
 import java.util.LinkedList;

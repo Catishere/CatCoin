@@ -1,4 +1,4 @@
-package utils;
+package blockchain;
 
 public class Transaction {
     private String sender;

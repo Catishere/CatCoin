@@ -1,7 +1,7 @@
 package controllers;
 
-import utils.Block;
-import utils.BlockChain;
+import blockchain.Block;
+import blockchain.BlockChain;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

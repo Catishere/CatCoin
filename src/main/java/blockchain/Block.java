@@ -1,4 +1,6 @@
-package utils;
+package blockchain;
+
+import utils.ByteUtils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -63,7 +65,10 @@ public class Block {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        byte[] hash = md.digest(this.serialize());
+        byte[] hash = new byte[0];
+        if (md != null) {
+            hash = md.digest(this.serialize());
+        }
 
         if (this.hash == null) {
             this.hash = hash;

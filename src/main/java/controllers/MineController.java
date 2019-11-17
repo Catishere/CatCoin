@@ -1,8 +1,8 @@
 package controllers;
 
-import utils.Block;
-import utils.BlockChain;
-import utils.UserUtil;
+import blockchain.Block;
+import blockchain.BlockChain;
+import utils.UserUtils;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -23,11 +23,11 @@ public class MineController extends AbstractController {
         String username = request.getParameter("username");
         String blockId = request.getParameter("blockId");
         String proof = request.getParameter("proof");
-        UserUtil userUtil = new UserUtil();
+        UserUtils userUtils = new UserUtils();
         switch (action)
         {
             case "mine":
-                userUtil.addUser(username);
+                userUtils.addUser(username);
                 respond("logged");
                 break;
             case "mined":
@@ -51,9 +51,7 @@ public class MineController extends AbstractController {
             RequestDispatcher view = request.getRequestDispatcher("/mine.html");
             try {
                 view.forward(request, response);
-            } catch (ServletException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (ServletException | IOException e) {
                 e.printStackTrace();
             }
         }
