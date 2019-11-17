@@ -2,17 +2,22 @@ package controllers;
 
 import blockchain.Block;
 import blockchain.BlockChain;
+import utils.HttpUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BlockController extends AbstractController {
+public class BlockController {
+    private HttpServletRequest request;
+    private HttpServletResponse response;
+    private HttpUtils hu;
 
     public BlockController(HttpServletRequest request, HttpServletResponse response) {
         this.request = request;
         this.response = response;
+        this.hu = new HttpUtils(request, response);
     }
 
     public void processPost() {
@@ -23,6 +28,13 @@ public class BlockController extends AbstractController {
         String[] uriPath = request.getPathInfo().split("/");
         BlockChain bc = BlockChain.getInstance();
         List<Block> blockList = new LinkedList<>();
+
+        if (uriPath.length < 2)
+        {
+            hu.dispatch("/error.html");
+            return;
+        }
+
         switch (uriPath[1])
         {
             case "queue":
@@ -31,9 +43,9 @@ public class BlockController extends AbstractController {
                     Block block = bc.findBlockInBlockQueue(uriPath[2]);
                     if (block != null)
                         blockList.add(block);
-                    respond(bc.serializeBlockList(uriPath[1], blockList));
+                    hu.respond(bc.serializeBlockList(uriPath[1], blockList));
                 } else
-                    respond(bc.serializeBlockQueue());
+                    hu.respond(bc.serializeBlockQueue());
                 break;
 
             case "chain":
@@ -42,9 +54,9 @@ public class BlockController extends AbstractController {
                     Block block = bc.findBlockInBlockChain(uriPath[2]);
                     if (block != null)
                         blockList.add(block);
-                    respond(bc.serializeBlockList(uriPath[1], blockList));
+                    hu.respond(bc.serializeBlockList(uriPath[1], blockList));
                 } else
-                    respond(bc.serializeBlockChain());
+                    hu.respond(bc.serializeBlockChain());
                 break;
         }
     }

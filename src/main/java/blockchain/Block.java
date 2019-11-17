@@ -17,6 +17,10 @@ public class Block {
         this.data = data;
     }
 
+    public Block() {
+
+    }
+
     public void setData(String data) {
         this.data = data;
     }

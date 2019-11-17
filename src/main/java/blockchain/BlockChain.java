@@ -2,6 +2,7 @@ package blockchain;
 
 import utils.ByteUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,9 +19,11 @@ public class BlockChain {
     }
 
     private LinkedList<Block> blockChain = new LinkedList<>();
+    //TODO: remove blockqueue, decentralize block creating
     private LinkedList<Block> blockQueue = new LinkedList<>();
+    private List<Transaction> transactionPool = new ArrayList<>();
 
-    public void addBlock(Block block) {
+    public void addBlockToChain(Block block) {
 
         if (blockChain.size() > 0)
             block.setPrevHash(blockChain.getLast().getHash());

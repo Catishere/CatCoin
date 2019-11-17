@@ -2,6 +2,7 @@ package controllers;
 
 import blockchain.Block;
 import blockchain.BlockChain;
+import utils.HttpUtils;
 import utils.UserUtils;
 
 import javax.servlet.RequestDispatcher;
@@ -11,27 +12,32 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class MineController extends AbstractController {
+public class MineController {
+    private HttpServletRequest request;
+    private HttpServletResponse response;
+    private HttpUtils hu;
 
     public MineController(HttpServletRequest request, HttpServletResponse response) {
         this.request = request;
         this.response = response;
+        this.hu = new HttpUtils(request, response);
     }
 
     public void processPost() {
-        String action = request.getParameter("action");
+        String[] uriPath = request.getPathInfo().split("/");
         String username = request.getParameter("username");
         String blockId = request.getParameter("blockId");
         String proof = request.getParameter("proof");
         UserUtils userUtils = new UserUtils();
-        switch (action)
+
+        switch (uriPath[1])
         {
             case "mine":
                 userUtils.addUser(username);
-                respond("logged");
+                hu.respond("logged");
                 break;
             case "mined":
-                respond(BlockChain.getInstance()
+                hu.respond(BlockChain.getInstance()
                         .mineBlock(blockId,  Long.parseLong(proof)));
                 break;
         }
@@ -39,21 +45,20 @@ public class MineController extends AbstractController {
 
     public void processGet() {
         String action = request.getParameter("action");
+        BlockChain bc = BlockChain.getInstance();
+
         if (action != null) {
             switch (action) {
                 case "block":
-                    Block block = new Block("Kurzacskawe");
-                    BlockChain.getInstance().addBlock(block);
-                    respond("{\"hash\":" + Arrays.toString(block.serialize()) + ",\"id\":\"" + block.getId() + "\"}");
+                    Block block = bc.getBlockQueue().peekFirst();
+                    if (block != null)
+                        hu.respond(bc.serializeBlock(block));
+                    else
+                        hu.dispatch("/noblocks.html");
                     break;
             }
         } else {
-            RequestDispatcher view = request.getRequestDispatcher("/mine.html");
-            try {
-                view.forward(request, response);
-            } catch (ServletException | IOException e) {
-                e.printStackTrace();
-            }
+            hu.dispatch("/mine.html");
         }
     }
 }
