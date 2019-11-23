@@ -49,7 +49,6 @@ public class BlockChain {
     }
 
     public boolean verifyProof(byte[] hash) {
-        System.out.println(ByteUtils.byteToHexString(hash));
         String hashString = ByteUtils.byteToHexString(hash);
         for (int i = 0; i < difficulty; i++) {
             if (hashString.charAt(i) != '0')

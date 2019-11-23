@@ -80,6 +80,7 @@ public class Block {
             this.hash = hash;
             this.id = ByteUtils.byteToHexString(this.hash);
         }
+        System.out.println(ByteUtils.byteToHexString(hash));
         return hash;
     }
 
