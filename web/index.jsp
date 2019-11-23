@@ -11,6 +11,5 @@
     <title>$Title$</title>
   </head>
   <body>
-  Na maika ti w putkata tupa java
   </body>
 </html>

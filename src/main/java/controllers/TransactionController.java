@@ -1,10 +1,13 @@
 package controllers;
 
+import blockchain.BlockChain;
 import blockchain.Transaction;
+import com.google.gson.Gson;
 import utils.HttpUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public class TransactionController {
     private HttpServletRequest request;
@@ -18,21 +21,13 @@ public class TransactionController {
     }
 
     public void processPost() {
-        String action = request.getParameter("action");
-        String sender = request.getParameter("sender");
-        String receiver = request.getParameter("receiver");
-        String amount = request.getParameter("amount");
-        Transaction transaction = new Transaction(sender, receiver, Long.parseLong(amount));
-
-        switch (action)
-        {
-            case "transfer":
-                hu.respond("logged");
-                break;
-        }
+        Gson gson = new Gson();
+        Transaction transaction = gson.fromJson(request.getParameter("transaction"), Transaction.class);
+        BlockChain.getInstance().addTransaction(transaction);
     }
 
     public void processGet() {
-
+        List<Transaction> pool = BlockChain.getInstance().getTransactionPool();
+        hu.processGetList(pool);
     }
 }

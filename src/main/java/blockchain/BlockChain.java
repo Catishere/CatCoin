@@ -1,42 +1,56 @@
 package blockchain;
 
+import com.google.gson.Gson;
 import utils.ByteUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BlockChain {
 
     private static final BlockChain instance = new BlockChain();
 
-    private BlockChain(){}
+    private BlockChain(){
+        Block genesis = new Block("Totally legit blockchain");
+        genesis.calculateHash();
+        blockChain.add(genesis);
+
+        transactionPool.add(new Transaction("wiki", "bo23bi", 10.0));
+        transactionPool.add(new Transaction("asd", "23bobi", 20.0));
+        transactionPool.add(new Transaction("sssda", "bo2bi", 30.0));
+        transactionPool.add(new Transaction("s", "bo2bi", 440.0));
+        transactionPool.add(new Transaction("wiki", "b12obi", 410.0));
+        transactionPool.add(new Transaction("asdasdasd", "bo3bi", 410.0));
+    }
 
     public static BlockChain getInstance(){
         return instance;
     }
 
     private LinkedList<Block> blockChain = new LinkedList<>();
-    //TODO: remove blockqueue, decentralize block creating
-    private LinkedList<Block> blockQueue = new LinkedList<>();
     private List<Transaction> transactionPool = new ArrayList<>();
+    private int difficulty = 3;
 
-    public void addBlockToChain(Block block) {
+    public void setDifficulty(int difficulty) {
+        this.difficulty = difficulty;
+    }
 
-        if (blockChain.size() > 0)
-            block.setPrevHash(blockChain.getLast().getHash());
-        else
-            block.setPrevHash(new byte[32]);
+    public int getDifficulty() {
+        return difficulty;
+    }
 
-        block.calculateHash();
-        blockQueue.add(block);
+    public List<Transaction> getTransactionPool() {
+        return transactionPool;
+    }
+
+    public void setTransactionPool(List<Transaction> transactionPool) {
+        this.transactionPool = transactionPool;
     }
 
     public boolean verifyProof(byte[] hash) {
+        System.out.println(ByteUtils.byteToHexString(hash));
         String hashString = ByteUtils.byteToHexString(hash);
-        int difficulty = 3;
         for (int i = 0; i < difficulty; i++) {
             if (hashString.charAt(i) != '0')
                 return  false;
@@ -44,70 +58,19 @@ public class BlockChain {
         return true;
     }
 
-    public Block findBlockInBlockQueue(String blockId) {
-        for (Block block : blockQueue) {
-            if (block.getId().equals(blockId))
-                return block;
+    public boolean addBlock(Block block) {
+        if (verifyProof(block.calculateHash())) {
+            blockChain.add(block);
+            return true;
         }
-        return null;
+        return false;
     }
-
-    public Block findBlockInBlockChain(String blockId) {
-        for (Block block : blockChain) {
-            if (block.getId().equals(blockId))
-                return block;
-        }
-        return null;
-    }
-
-    public String mineBlock(String blockId, Long proof) {
-        for (Block block : blockQueue) {
-            if (block.getId().equals(blockId))
-            {
-                block.setProofOfWork(proof);
-                if (verifyProof(block.calculateHash())) {
-                    blockChain.add(block);
-                    blockQueue.remove(block);
-                    return "Success";
-                }
-                return "Proof doesn't match";
-            }
-        }
-        return "Not Found";
-    }
-
-    public String serializeBlock(Block block)
-    {
-        return "{\"hash\":" +
-                Arrays.toString(block.serialize()) +
-                ",\"id\":\"" +
-                block.getId() +
-                "\"}";
-    }
-
-    public String serializeBlockList(String header, List<Block> list)
-    {
-        return "{\"" + header + "\":[" +
-                list.stream()
-                        .map(this::serializeBlock)
-                        .collect(Collectors.joining(",")) +
-                "]}";
-    }
-
-    public String serializeBlockQueue() {
-        return serializeBlockList("queue", blockQueue);
-    }
-
-    public String serializeBlockChain()  {
-        return serializeBlockList("chain", blockChain);
-    }
-
 
     public List<Block> getBlockChain() {
         return blockChain;
     }
 
-    public LinkedList<Block> getBlockQueue() {
-        return blockQueue;
+    public void addTransaction(Transaction transaction) {
+        transactionPool.add(transaction);
     }
 }

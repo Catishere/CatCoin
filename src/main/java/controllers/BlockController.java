@@ -2,11 +2,11 @@ package controllers;
 
 import blockchain.Block;
 import blockchain.BlockChain;
+import com.google.gson.Gson;
 import utils.HttpUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.LinkedList;
 import java.util.List;
 
 public class BlockController {
@@ -21,43 +21,16 @@ public class BlockController {
     }
 
     public void processPost() {
-
+        Gson gson = new Gson();
+        Block block = gson.fromJson(request.getParameter("block"), Block.class);
+        if (BlockChain.getInstance().addBlock(block))
+            hu.respond("Successfully added to blockchain");
+        else
+            hu.respond("Failed to add to blockchain");
     }
 
     public void processGet() {
-        String[] uriPath = request.getPathInfo().split("/");
-        BlockChain bc = BlockChain.getInstance();
-        List<Block> blockList = new LinkedList<>();
-
-        if (uriPath.length < 2)
-        {
-            hu.dispatch("/error.html");
-            return;
-        }
-
-        switch (uriPath[1])
-        {
-            case "queue":
-                if (uriPath.length > 2)
-                {
-                    Block block = bc.findBlockInBlockQueue(uriPath[2]);
-                    if (block != null)
-                        blockList.add(block);
-                    hu.respond(bc.serializeBlockList(uriPath[1], blockList));
-                } else
-                    hu.respond(bc.serializeBlockQueue());
-                break;
-
-            case "chain":
-                if (uriPath.length > 2)
-                {
-                    Block block = bc.findBlockInBlockChain(uriPath[2]);
-                    if (block != null)
-                        blockList.add(block);
-                    hu.respond(bc.serializeBlockList(uriPath[1], blockList));
-                } else
-                    hu.respond(bc.serializeBlockChain());
-                break;
-        }
+        List<Block> blockList = BlockChain.getInstance().getBlockChain();
+        hu.processGetList(blockList);
     }
 }

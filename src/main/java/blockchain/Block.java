@@ -1,7 +1,7 @@
 package blockchain;
 
+import com.google.gson.Gson;
 import utils.ByteUtils;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -9,7 +9,7 @@ public class Block {
     private String data;
     private String id;
     private byte[] hash;
-    private byte[] prevHash;
+    private byte[] prevHash = new byte[32];
     private Long transactions = 0L;
     private Long proofOfWork = 0L;
 
@@ -45,7 +45,7 @@ public class Block {
         int it = 0;
         byte[] dataBytes = data.getBytes();
 
-        byte[] serializedObj = new byte[dataBytes.length + prevHash.length + Long.BYTES];
+        byte[] serializedObj = new byte[dataBytes.length + 32 + Long.BYTES];
         for (byte b : dataBytes) {
             serializedObj[it] = b;
             it++;
@@ -60,8 +60,10 @@ public class Block {
             it++;
         }
 
+        System.out.println(new Gson().toJson(serializedObj));
         return serializedObj;
     }
+
     public byte[] calculateHash() {
         MessageDigest md = null;
         try {
@@ -87,5 +89,9 @@ public class Block {
 
     public String getId() {
         return this.id;
+    }
+
+    public String getData() {
+        return data;
     }
 }

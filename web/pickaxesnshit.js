@@ -1,41 +1,50 @@
+function constructBlock(transactions) {
+    var trans_json = JSON.parse(transactions);
+    var block_json = {};
+    block_json.data = transactions;
+    block_json.transactions = trans_json.length;
+    $.get( "/web/block", function (data) {
+        var blocks = JSON.parse(data);
+        block_json.prevHash = blocks[blocks.length - 1].hash;
+        block_json.proofOfWork = mine(block_json);
+        console.log("Block mined with: " + block_json.proofOfWork);
+        submitBlock(block_json);
+    });
+}
+
+function submitBlock(block_json) {
+    $.post( "/web/block",
+        {
+            block: JSON.stringify(block_json)
+        }, function (data) {
+            console.log(data);
+    });
+}
+
 $(document).ready ( function () {
     $('#submit').click(function() {
-        $.post( "mine",
-            {
-                username: $("#username").val(),
-                action: $("#action").val()
-            },
-            function (data) {
-                console.log(data);
-                $.get( "mine",
-                    {
-                        action: "block"
-                    }, function (block) {
-                        var block_json = JSON.parse(block);
-                        var proof = mine(block_json);
-                        console.log("Block mined with: " + proof);
-                        $.post( "mine",
-                            {
-                                action: "mined",
-                                proof: proof,
-                                blockId: block_json.id
-                            },
-                            function (data) {
-                                console.log(data);
-                            });
-                    });
-            });
+        $.get( "/web/transaction/count/50", function (data) {
+            console.log(data);
+            constructBlock(data);
+        });
     });
 });
 
-var applyProofOfWork = function (block, test) {
-    block[block.length - 1] = test & 0x000000FF;
-    block[block.length - 2] = (test & 0x0000FF00) >> 8;
-    block[block.length - 3] = (test & 0x00FF0000) >> 16;
-    block[block.length - 4] = (test & 0xFF000000) >> 24;
+var getProofOfWork = function (test) {
+    var hash = new Int8Array(8);
+    hash[7] = test  &   0x00000000000000FF;
+    hash[6] = (test &   0x000000000000FF00) >> 8;
+    hash[5] = (test &   0x0000000000FF0000) >> 16;
+    hash[4] = (test &   0x00000000FF000000) >> 24;
+    hash[3] = (test &   0x000000FF00000000) >> 32;
+    hash[2] = (test &   0x0000FF0000000000) >> 40;
+    hash[1] = (test &   0x00FF000000000000) >> 48;
+    hash[0] = (test &   0xFF00000000000000) >> 56;
+    return hash;
 };
 
 function verifyProofOfWork(blockHash) {
+    //console.log(blockHash);
     var difficulty = 3;
     for (var i = 0; i < difficulty; i++) {
         if (blockHash[i] !== '0')
@@ -44,11 +53,20 @@ function verifyProofOfWork(blockHash) {
     return true;
 }
 
-function mine(block) {
+function concatArray(a, b) {
+    var c = new Int8Array(a.length + b.length);
+    c.set(a);
+    c.set(b, a.length);
+    return c;
+}
 
+function mine(block) {
+    var utf8Encode = new TextEncoder();
+    var utf8Decode = new TextDecoder();
+    var data = utf8Encode.encode(block.data);
     for (var i = 0; true; i++) {
-        applyProofOfWork(block.hash, i);
-        if (verifyProofOfWork(SHA256(String.fromCharCode.apply(String, block.hash))))
+        var h = utf8Decode.decode(concatArray(data, concatArray(block.prevHash, getProofOfWork(i))));
+        if (verifyProofOfWork(SHA256(h)))
             return i;
     }
 }

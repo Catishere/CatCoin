@@ -1,6 +1,6 @@
 package servlets;
 
-import controllers.TransactionController;
+import utils.HttpUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -9,15 +9,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(name = "TransactionServlet")
-public class TransactionServlet extends HttpServlet {
+@WebServlet(name = "RootServlet")
+public class RootServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        TransactionController controller = new TransactionController(request, response);
-        controller.processPost();
+        HttpUtils httpUtils = new HttpUtils(request, response);
+        httpUtils.error("Illegal request");
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        TransactionController controller = new TransactionController(request, response);
-        controller.processGet();
+        HttpUtils httpUtils = new HttpUtils(request, response);
+        httpUtils.home();
     }
 }

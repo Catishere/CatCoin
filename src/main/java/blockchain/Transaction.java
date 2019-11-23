@@ -5,10 +5,13 @@ public class Transaction {
     private String receiver;
     private double amount;
 
-    public Transaction(String sender, String receiver, Long amount) {
+    public Transaction(String sender, String receiver, Double amount) {
         this.sender = sender;
         this.receiver = receiver;
         this.amount = amount;
+    }
+
+    public Transaction() {
     }
 
     public String getSender() {
