@@ -59,8 +59,7 @@ public class Block {
             serializedObj[it] = b;
             it++;
         }
-
-        System.out.println(new Gson().toJson(serializedObj));
+        
         return serializedObj;
     }
 
@@ -80,7 +79,6 @@ public class Block {
             this.hash = hash;
             this.id = ByteUtils.byteToHexString(this.hash);
         }
-        System.out.println(ByteUtils.byteToHexString(hash));
         return hash;
     }
 

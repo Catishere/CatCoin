@@ -51,30 +51,35 @@ function verifyProofOfWork(blockHash) {
 }
 
 function concatArrays(a, b, c) {
-    var d = new Int16Array(a.length + b.length + c.length);
+    var d = new Int8Array(a.length + b.length + c.length);
     d.set(a);
     d.set(b, a.length);
     d.set(c, a.length + b.length);
     return d;
 }
-function ab2str(buf) {
-    return String.fromCharCode.apply(null, new Int16Array(buf));
-}
 
 function str2ab(str) {
-    var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
-    var bufView = new Int16Array(buf);
-    for (var i=0, strLen=str.length; i<strLen; i++) {
-        bufView[i] = str.charCodeAt(i);
+    var strLength = str.length;
+    var ab = new Int8Array(strLength);
+    for (var i = 0; i < strLength; i++) {
+        ab[i] = str.charCodeAt(i);
     }
-    return bufView;
+    return ab;
+}
+function arrayBufferToWordArray(ab) {
+    var i8a = new Uint8Array(ab);
+    var a = [];
+    for (var i = 0; i < i8a.length; i += 4) {
+        a.push(i8a[i] << 24 | i8a[i + 1] << 16 | i8a[i + 2] << 8 | i8a[i + 3]);
+    }
+    return CryptoJS.lib.WordArray.create(a, i8a.length);
 }
 
 function mine(block) {
     var data = str2ab(block.data);
     for (var i = 0; true; i++) {
-        var h = ab2str(concatArrays(data, block.prevHash, getProofOfWork(i)));
-        var hash = CryptoJS.SHA256(h);
+        var wordArray = arrayBufferToWordArray(concatArrays(data, block.prevHash, getProofOfWork(i)));
+        var hash = CryptoJS.SHA256(wordArray);
         if (verifyProofOfWork(hash.toString(CryptoJS.enc.Hex)))
             return i;
     }
